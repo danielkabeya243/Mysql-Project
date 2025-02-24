@@ -190,7 +190,7 @@ INSERT INTO Appointments (patientID, doctorID, appointmentDate, appointmentTime,
 
 
 
-INSERT INTO MedicalRecords(patientID,doctorID,diagnosis,prescription,testResults)VALUES
+INSERT INTO MedicalRecords(patientID,doctorID,diagnosis,prescriptions,testResults)VALUES
 ((SELECT patientID FROM Patients WHERE patientName = 'John Doe')
 ,(SELECT doctorID FROM Doctors WHERE doctorName = 'Dr. Alice Brown')
 ,'Hypertension'
@@ -220,7 +220,110 @@ INSERT INTO MedicalRecords(patientID,doctorID,diagnosis,prescription,testResults
 ,'Fever'
 ,'Antipyretics, Hydration'
 ,'Blood test, Urine test'
-);
+),
+
+((SELECT patientID FROM Patients WHERE patientName = 'Paul Adams')
+,(SELECT doctorID FROM Doctors WHERE doctorName ='Dr. Alice Brown')
+,NULL
+,NULL 
+,NULL
+),
+
+((SELECT patientID FROM Patients WHERE patientName = 'Sophie Martin')
+,(SELECT doctorID FROM Doctors WHERE doctorName ='Dr. Robert White')
+,NULL
+,NULL 
+,NULL
+),
+
+((SELECT patientID FROM Patients WHERE patientName = 'Leo Dupont')
+,(SELECT doctorID FROM Doctors WHERE doctorName ='Dr. Sarah Green')
+,NULL
+,NULL 
+,NULL
+),
+((SELECT patientID FROM Patients WHERE patientName = 'Emma Lambert')
+,(SELECT doctorID FROM Doctors WHERE doctorName ='Dr. Mark Black')
+,NULL
+,NULL 
+,NULL
+),
+((SELECT patientID FROM Patients WHERE patientName = 'Omar Hassan')
+,(SELECT doctorID FROM Doctors WHERE doctorName ='Dr. Laura Grey')
+,NULL
+,NULL 
+,NULL
+)
+;
+
+
+
+
+INSERT INTO Billing (patientID,amount,paymentStatus,paymentDate,insuranceProvider)VALUES
+((SELECT patientID FROM Patients WHERE patientName = 'John Doe')
+,150.00
+,'Paid'
+,'2025-02-10'
+,'HealthCare Insurance Co.'
+),
+((SELECT patientID FROM Patients WHERE patientName = 'Jane Smith')
+,120.00
+,'Pending'
+,NULL
+,'Wellness Insurance Ltd.'
+),
+((SELECT patientID FROM Patients WHERE patientName = 'Mike Johnson')
+,200.00
+,'Paid'
+,'2025-02-12'
+,'Prime Health Insurance'
+),
+((SELECT patientID FROM Patients WHERE patientName = 'Emily Davis')
+,80.00
+,'Pending'
+,NULL
+,'CarePlus Insurance'
+),
+((SELECT patientID FROM Patients WHERE patientName = 'Chris Wilson')
+,100.00
+,'Paid'
+,2025-02-14
+,'Family Health Insurance'
+),
+((SELECT patientID FROM Patients WHERE patientName = 'Paul Adams')
+,180.00
+,'Pending'
+,NULL
+,'Secure Health Insurance'
+),
+((SELECT patientID FROM Patients WHERE patientName = 'Sophie Martin')
+,150.00
+,'Pending'
+,NULL
+,'Wellness Insurance Ltd.'
+),
+((SELECT patientID FROM Patients WHERE patientName = 'Leo Dupont')
+,130.00
+,'Pending'
+,NULL
+,'HealthCare Insurance Co.'
+),
+((SELECT patientID FROM Patients WHERE patientName = 'Emma Lambert')
+,110.00
+,'Pending'
+,NULL
+,'CarePlus Insurance'
+),
+((SELECT patientID FROM Patients WHERE patientName = 'Omar Hassan')
+,140.00
+,'Pending'
+,NULL
+,'Family Health Insurance'
+)
+;
+SELECT *
+FROM Billing;
+
 
 
 
@@ -228,7 +331,7 @@ INSERT INTO MedicalRecords(patientID,doctorID,diagnosis,prescription,testResults
 
 -- List all patients who have appointments this week.
 
-SELECT 
+/*SELECT 
     p.patientName AS nomDuPatient,
     p.age AS ageDuPatient,
     p.gender AS genreDuPatient,
@@ -248,7 +351,82 @@ ORDER BY doctorName;
 
 
 SELECT *
-FROM Doctors;
+FROM Doctors;*/
+
+-- Find the total number of patients each doctor has treated.
+SELECT 
+    d.doctorName,
+    COUNT(DISTINCT m.PatientID) AS totalPatientsTreated
+FROM 
+    Doctors d
+JOIN 
+    MedicalRecords m ON d.DoctorID = m.DoctorID
+WHERE 
+    m.Diagnosis IS NOT NULL  -- Only count treated patients (patients with a diagnosis)
+GROUP BY 
+    d.doctorID;
+;
+-- Show all pending payments from the Billing table.
+SELECT *
+FROM Billing
+WHERE PaymentStatus="Pending";
+
+--  Get the most common diagnosis among patients
+SELECT Diagnosis, COUNT(*) AS CommonDiagnostic
+FROM MedicalRecords
+GROUP BY Diagnosis
+ORDER BY CommonDiagnostic DESC;
+
+-- Retrieve all appointments for a specific doctor on a given date.
+
+SELECT 
+     d.doctorName AS NomDuDocteur,
+     p.patientName AS NomDuPatient,
+     a.appointmentDate AS DateDuRendezVous,
+     a.appointmentTime AS HeureDuRendezVous,
+     a.status AS Statut
+FROM Appointments AS a
+INNER JOIN Doctors AS d ON d.doctorID = a.doctorID
+INNER JOIN Patients AS p ON p.patientID = a.patientID
+WHERE d.doctorName = 'Dr. Alice Brown' AND a.appointmentDate ='2025-02-10';
+
+-- Find patients who have not visited the hospital in the last 6 months.
+
+SELECT 
+     p.patientName AS NomDuPatient
+FROM Appointments AS a
+INNER JOIN Patients AS p ON p.patientID = a.patientID
+WHERE a.appointmentDate < DATE_SUB(CURDATE(),INTERVAL 6 MONTH)
+GROUP BY NomDuPatient;
+
+-- Find the total amounts billed for patients treated by each doctor, displaying the total amount billed for each doctor.
+
+SELECT 
+    p.patientName AS NomDuPatient,
+    SUM(b.Amount) AS MontantFacture
+FROM Billing AS b
+INNER JOIN Patients as p ON p.patientID = b.patientID
+INNER JOIN MedicalRecords AS m ON m.PatientID = p.PatientID
+INNER JOIN Doctors AS d ON m.doctorID = d.doctorID
+GROUP BY d.doctorID
+ORDER BY MontantFacture ASC;
+
+-- Find the number of appointments made by each patient, by displaying the number of appointments for each patient
+SELECT 
+    p.patientName AS NomDuPatient,
+    COUNT(a.appointmentsID) AS NombreRendezVous
+FROM Appointments AS a
+INNER JOIN Patients AS p ON p.patientID= a.patientID
+GROUP BY p.patientID
+ORDER BY p.patientName ASC;
+   
+
+
+
+
+SELECT *
+FROM Appointments;
+
 
 
 
