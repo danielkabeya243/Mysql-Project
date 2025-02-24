@@ -6,6 +6,8 @@ DROP TABLE IF EXISTS Billing;
 DROP TABLE IF EXISTS Patients;
 DROP TABLE IF EXISTS Doctors;
 
+-- Table Patients
+
 CREATE TABLE Patients(
 patientID INT PRIMARY KEY AUTO_INCREMENT,
 patientName VARCHAR(100) NOT NULL,
@@ -16,6 +18,8 @@ address TEXT,
 registrationDate TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
+-- Table Doctors
+
 CREATE TABLE Doctors(
 doctorID INT PRIMARY KEY AUTO_INCREMENT,
 doctorName VARCHAR(100) NOT NULL,
@@ -25,6 +29,7 @@ department VARCHAR(100),
 joiningDate TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
+-- Table Appointments
 
 CREATE TABLE Appointments(
 appointmentsID INT PRIMARY KEY AUTO_INCREMENT,
@@ -40,6 +45,7 @@ FOREIGN KEY (doctorID) REFERENCES Doctors(doctorID) ON DELETE CASCADE
 
 
 
+-- Table Medical Records
 
 CREATE TABLE MedicalRecords(
 medicalRecordsID INT PRIMARY KEY AUTO_INCREMENT,
@@ -55,6 +61,8 @@ FOREIGN KEY (doctorID) REFERENCES Doctors(doctorID) ON DELETE CASCADE
 );
 
 
+-- Table Billing
+
 CREATE TABLE Billing(
 billingID INT PRIMARY KEY AUTO_INCREMENT,
 patientID INT,
@@ -66,13 +74,19 @@ FOREIGN KEY (patientID) REFERENCES Patients(patientID) ON DELETE CASCADE
 );
 
 
+-- Insertion of Data
 
 INSERT INTO Patients (patientName, age, gender, contactNumber, address, registrationDate) VALUES
 ('John Doe', 35, 'Male', '1234567890', '123 Main St, NY', NOW()),
 ('Jane Smith', 28, 'Female', '9876543210', '456 Oak St, CA', NOW()),
 ('Mike Johnson', 42, 'Male', '4567891230', '789 Pine St, TX', NOW()),
 ('Emily Davis', 30, 'Female', '7412589630', '101 Maple St, FL', NOW()),
-('Chris Wilson', 50, 'Male', '8529637410', '202 Cedar St, WA', NOW());
+('Chris Wilson', 50, 'Male', '8529637410', '202 Cedar St, WA', NOW()),
+('Paul Adams', 45, 'Male', '1231231234', '350 Elm St, NY',NOW()),
+('Sophie Martin', 33, 'Female', '3213214321', '670 Pine St, TX',NOW()),
+('Leo Dupont', 29, 'Male', '7418529630', '210 Maple St, FL',NOW()),
+('Emma Lambert', 40, 'Female', '9517538520', '555 Cedar St, WA',NOW()),
+('Omar Hassan', 38, 'Male', '1593574862', '890 Oak St, CA',NOW());
 
 
 INSERT INTO Doctors (doctorName, specialization, phoneNumber, department, joiningDate) VALUES
@@ -126,6 +140,91 @@ INSERT INTO Appointments (patientID, doctorID, appointmentDate, appointmentTime,
 ,'Fever'
 ,'Completed'
 );
+
+
+INSERT INTO Appointments (patientID, doctorID, appointmentDate, appointmentTime, diagnosis, status) VALUES
+((SELECT patientID FROM Patients WHERE patientName ='John Doe')
+,(SELECT doctorID FROM Doctors WHERE doctorName ='Dr. Sarah Green')
+,'2025-02-15'
+,'08:30:00'
+,'Routine check-up'
+,'Scheduled'
+);
+
+INSERT INTO Appointments (patientID, doctorID, appointmentDate, appointmentTime, diagnosis, status) VALUES
+((SELECT patientID FROM Patients WHERE patientName ='Mike Johnson')
+,(SELECT doctorID FROM Doctors WHERE doctorName ='Dr. Robert White')
+,'2025-02-16'
+,'10:00:00'
+,'Back pain'
+,'Scheduled'
+);
+
+INSERT INTO Appointments (patientID, doctorID, appointmentDate, appointmentTime, diagnosis, status) VALUES
+((SELECT patientID FROM Patients WHERE patientName ='Emily Davis')
+,(SELECT doctorID FROM Doctors WHERE doctorName ='Dr. Mark Black')
+,'2025-02-17'
+,'15:30:00'
+,'Allergy symptoms'
+,'Completed'
+);
+
+INSERT INTO Appointments (patientID, doctorID, appointmentDate, appointmentTime, diagnosis, status) VALUES
+((SELECT patientID FROM Patients WHERE patientName ='Jane Smith')
+,(SELECT doctorID FROM Doctors WHERE doctorName ='Dr. Alice Brown')
+,'2025-02-18'
+,'09:00:00'
+,'Chest pain'
+,'Scheduled'
+);
+
+INSERT INTO Appointments (patientID, doctorID, appointmentDate, appointmentTime, diagnosis, status) VALUES
+((SELECT patientID FROM Patients WHERE patientName ='Chris Wilson')
+,(SELECT doctorID FROM Doctors WHERE doctorName ='Dr. Mark Black')
+,'2025-02-19'
+,'11:15:00'
+,'Skin rash'
+,'Completed'
+);
+
+
+
+
+INSERT INTO MedicalRecords(patientID,doctorID,diagnosis,prescription,testResults)VALUES
+((SELECT patientID FROM Patients WHERE patientName = 'John Doe')
+,(SELECT doctorID FROM Doctors WHERE doctorName = 'Dr. Alice Brown')
+,'Hypertension'
+,'Beta-blockers, Diuretics'
+,'Blood pressure test, ECG'
+),
+((SELECT patientID FROM Patients WHERE patientName = 'Jane Smith')
+,(SELECT doctorID FROM Doctors WHERE doctorName ='Dr. Robert White')
+,'Migraine'
+,'Pain relievers, Anti-nausea medication'
+,'MRI scan, Blood test'
+),
+((SELECT patientID FROM Patients WHERE patientName = 'Mike Johnson')
+,(SELECT doctorID FROM Doctors WHERE doctorName ='Dr. Sarah Green')
+,'Knee pain'
+,'Anti-inflammatory medication'
+,'X-ray, MRI scan'
+),
+((SELECT patientID FROM Patients WHERE patientName = 'Emily Davis')
+,(SELECT doctorID FROM Doctors WHERE doctorName ='Dr. Mark Black')
+,'Skin allergy'
+,'Antihistamines, Topical creams'
+,'Allergy test'
+),
+((SELECT patientID FROM Patients WHERE patientName = 'Jane Smith')
+,(SELECT doctorID FROM Doctors WHERE doctorName ='Dr. Laura Grey')
+,'Fever'
+,'Antipyretics, Hydration'
+,'Blood test, Urine test'
+);
+
+
+
+
 
 -- List all patients who have appointments this week.
 
