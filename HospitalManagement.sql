@@ -419,9 +419,78 @@ FROM Appointments AS a
 INNER JOIN Patients AS p ON p.patientID= a.patientID
 GROUP BY p.patientID
 ORDER BY p.patientName ASC;
-   
 
+-- Find number of patients by doctor department
+SELECT 
+     COUNT(DISTINCT p.patientID) AS NombrePatient,
+     d.doctorName AS NomDuDocteur,
+     d.department AS DepartementDuMedecin
+FROM MedicalRecords AS m
+INNER JOIN Patients AS p ON p.patientID = m.patientID
+INNER JOIN Doctors AS d ON d.doctorID= m.doctorID
+GROUP BY d.department 
+ORDER BY d.doctorName ASC;
 
+-- Find the number of patients treated for each disease type (based on diagnosis), using data from the medical records table.
+
+SELECT 
+     COUNT(DISTINCT m.patientID) AS NombrePatients,
+     m.Diagnosis AS DiagnostiqueDuPatient
+FROM MedicalRecords AS m
+INNER JOIN Patients AS p ON p.patientID = m.patientID
+GROUP BY m.Diagnosis
+ORDER BY NombrePatients ASC;
+
+-- Find the number of bills paid by each patient, displaying the total number of bills paid for each patient
+
+SELECT 
+	  COUNT(DISTINCT b.billingID) AS NombreTotalDeFacture,
+      p.patientID AS IdDuPatient,
+      p.patientName AS NomDuPatient,
+      SUM(b.Amount) AS MontantPaye,
+      b.PaymentDate AS DateDuPaiement
+FROM Billing AS b
+INNER JOIN Patients AS p ON p.patientID= b.PatientID
+WHERE b.PaymentStatus ='Paid'
+GROUP BY b.Amount
+ORDER BY NomDuPatient ASC, IdDuPatient DESC;
+
+-- Find the number of appointments scheduled for each day of the week, grouped by appointment date.
+ 
+ SELECT 
+    DAYNAME(a.appointmentDate) AS JourDuRendezVous,
+    a.appointmentDate AS DateDuRendezVous,
+    COUNT(a.appointmentsID) AS NombreAppointments
+FROM Appointments AS a
+GROUP BY a.appointmentDate
+ORDER BY a.appointmentDate ASC;
+
+-- Find the total amount paid by each patient, by displaying the sum of payments made by each patient.
+
+SELECT
+    p.patientName AS NomDuPatient,
+    SUM(b.amount) AS MontantPaye
+FROM Billing AS b
+INNER JOIN Patients AS p ON p.patientID=b.patientID
+GROUP BY b.amount
+ORDER BY p.patientName ASC;
+
+-- Find the doctors who have made the greatest number of consultations (number of appointments), by displaying the doctor and the number of appointments
+SELECT 
+   d.doctorName AS NomDuDocteur,
+   COUNT(a.appointmentsID) AS NombreRendezVous
+FROM Appointments AS a
+INNER JOIN Doctors AS d ON d.doctorID = a.doctorID   
+GROUP BY d.doctorID
+ORDER BY NombreRendezVous DESC;
+
+SELECT 
+    COUNT(DISTINCT p.patientID) AS NombreRendezVous,
+    a.status AS StatusDuRendezVous
+FROM Appointments AS a
+INNER JOIN Patients AS p ON p.patientID = a.patientID
+GROUP BY a.status
+ORDER BY NombreRendezVous DESC;
 
 
 SELECT *
