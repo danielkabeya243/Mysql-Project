@@ -492,9 +492,70 @@ INNER JOIN Patients AS p ON p.patientID = a.patientID
 GROUP BY a.status
 ORDER BY NombreRendezVous DESC;
 
+-- Affiche tous les docteurs, même ceux qui n'ont pas eu de rendez-vous programmés, avec 
+
+SELECT d.doctorID,
+       d.doctorName AS NomDuDocteur,
+       COALESCE(COUNT(a.appointmentsID), 0) AS NombreRendezVousPris
+FROM Doctors AS d
+LEFT JOIN Appointments AS a
+      ON d.doctorID = a.doctorID
+GROUP BY d.doctorID, d.doctorName
+ORDER BY NomDuDocteur;
+
+-- Affiche tous les patients ainsi que : le montant qu'ils ont payé , ou si 0 aucun paiement n'a ete effectué
+
+SELECT 
+    p.patientName AS NomDuPatient,
+    COALESCE(SUM(b.Amount), 0) AS MontantPaye
+FROM
+    Patients AS p
+        LEFT JOIN
+    Billing AS b ON p.patientID = b.patientID
+WHERE
+    PaymentStatus = 'Pending'
+GROUP BY p.patientID
+ORDER BY NomDuPatient;
+
+-- Pour chaque rendez-vous, afficher : Le nom du patient,
+-- Le nom du docteur, Et une colonne "État" qui indique :'Rendez-vous terminé' si status = 'Completed','Rendez-vous annulé' si status = 'Cancelled',
+-- Sinon 'À venir'.
+
+SELECT p.patientName AS nomPatient,
+       d.doctorName AS  nomDocteur,
+         CASE 
+            WHEN a.status='Completed' THEN 'Rendez-vous terminé' 
+            WHEN a.status='Cancelled' THEN 'Rendez-vous annulé'
+            ELSE 'À Venir'
+         END AS Etat    
+FROM Appointments a
+INNER JOIN Patients p ON p.patientID=a.patientID
+INNER JOIN Doctors d ON d.doctorID = a.doctorID
+ORDER BY nomPatient;
+
+-- Affiche tous les patients et leur statut de paiement :
+
+-- "Payé" si tous leurs paiements sont marqués "Paid",
+
+-- "En attente" s'ils ont au moins un paiement "Pending".
+
+-- (Utiliser LEFT JOIN + CASE)
+
+SELECT 
+    p.patientName AS NomDuPatient,
+    CASE 
+        WHEN MAX(b.PaymentStatus = 'Pending') = 1 THEN 'En attente'
+        WHEN COUNT(b.billingID) > 0 THEN 'Payé'
+        ELSE 'Aucun paiement'
+    END AS StatutDePaiement
+FROM Patients AS p
+LEFT JOIN Billing AS b ON p.patientID = b.patientID
+GROUP BY p.patientID, p.patientName
+ORDER BY NomDuPatient;
+
 
 SELECT *
-FROM Appointments;
+FROM Patients;
 
 
 
