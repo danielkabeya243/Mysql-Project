@@ -110,8 +110,7 @@ INSERT INTO Reservations(Client_id,Trajet_id,DateReservation, Places, MontantTot
 
 TRUNCATE TABLE Reservations;
 
-SELECT *
-FROM Reservations;
+
 
 SELECT c.Nom as NomDuClient,
       t.VilleDepart as VilleDeDepart,
@@ -123,8 +122,6 @@ INNER JOIN Clients as c ON c.Client_Id= r.Client_id
 INNER JOIN Trajets as t ON t.Trajet_Id = r.Trajet_id
 ORDER BY NomDuClient;
 
-SELECT *
-FROM Clients;
 
 SELECT c.Nom as NomDuClient,
       t.VilleDepart as VilleDeDepart,
@@ -138,16 +135,13 @@ WHERE r.MontantTotal > 200
 ORDER BY NomDuClient;
 
 SELECT 
-      t.VilleDepart as VilleDeDepart,
-      t.VilleArrivee as VilleDarrivee,
-      r.Places as NombreDePlace,
-      r.MontantTotal as MontantReservation,
-      COUNT(r.Reservation_Id ) as NombreTrajet
-FROM Reservations as r
-INNER JOIN Clients as c ON c.Client_Id= r.Client_id
-INNER JOIN Trajets as t ON t.Trajet_Id = r.Trajet_id
-GROUP BY t.VilleDepart 
-ORDER BY VilleDeDepart;
+      t.VilleDepart,
+      t.VilleArrivee,
+      COUNT(r.ReservationID) AS NombreReservations
+FROM Reservations r
+INNER JOIN Trajets t ON t.TrajetID = r.TrajetID
+GROUP BY t.VilleDepart, t.VilleArrivee
+ORDER BY t.VilleDepart;
 
 SELECT 
 	  c.Nom as NomDuClient,
@@ -161,10 +155,62 @@ ALTER TABLE Clients ADD COLUMN VIP BOOLEAN DEFAULT FALSE;
 UPDATE Clients
 SET VIP = TRUE
 WHERE Client_Id IN (
-  SELECT Client_id
+  SELECT Client_Id
   FROM Reservations
-  WHERE MontantTotal > 150
+  GROUP BY Client_Id
+  HAVING SUM(MontantTotal) > 150
 );
+ALTER TABLE Trajets ADD COLUMN Premium BOOLEAN DEFAULT FALSE;
+
+SET SQL_SAFE_UPDATES = 0;
+UPDATE Trajets
+SET Premium = TRUE
+WHERE prix > 150;
+
+UPDATE Trajets
+SET Prix= Prix - (Prix * 0.10)
+WHERE DistanceKm > 500;
+
+DELETE FROM Reservations
+WHERE TrajetID IN (
+  SELECT TrajetID FROM Trajets WHERE Disponible = FALSE
+);
+
+
+
+       
+       
+       
+       
+       
+       
+       
+       
+       
+       
+       
+       
+       
+       
+       
+       
+       
+       
+       
+       
+       
+       
+       
+       
+       
+       
+       .
+
+FROM Clients AS c
+INNER JOIN Reservations AS r ON c.Client_id=Client_Id
+;
+
+
 
 
 
